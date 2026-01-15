@@ -47,6 +47,28 @@ export const user = pgTable("user", {
     .notNull(),
 });
 
+export const tasks = createTable(
+  "task",
+  (d) => ({
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description"),
+    completed: boolean("completed").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date(),
+    ),
+  }),
+  (t) => [index("task_user_id_idx").on(t.userId), index("task_done_idx").on(t.completed)],
+);
+
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
@@ -91,9 +113,14 @@ export const verification = pgTable("verification", {
   ),
 });
 
+export const tasksRelations = relations(tasks, ({ one }) => ({
+  user: one(user, { fields: [tasks.userId], references: [user.id] }),
+}));
+
 export const userRelations = relations(user, ({ many }) => ({
   account: many(account),
   session: many(session),
+  tasks: many(tasks),
 }));
 
 export const accountRelations = relations(account, ({ one }) => ({
