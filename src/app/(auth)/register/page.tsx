@@ -88,7 +88,7 @@ export default function RegisterPage() {
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="mínimo 6 caracteres"
+                      placeholder="mínimo 8 caracteres"
                       {...field}
                     />
                   </FormControl>
